@@ -6,8 +6,11 @@ package it.unipd.mtss.business;
 
 import static org.junit.Assert.assertEquals;
 
+
 import org.junit.Before;
 import org.junit.Test;
+
+import java.time.LocalTime;
 import java.util.List;
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -25,7 +28,7 @@ public class BillTest {
     public void initialize(){
         bill = new BillImplemented();
         itemsOrdered = new ArrayList<EItem>();
-        user = new User("Samuel", "Scara", 1717171717, LocalDate.of(2001, 9, 29));
+        user = new User("Samuel", "Scara", 1717171717, LocalDate.of(2011, 9, 29));
     }
 
     @Test
@@ -33,8 +36,11 @@ public class BillTest {
         itemsOrdered.add(new EItem(EItem.item.Scheda_Madre, "Asrock", 267.35));
         itemsOrdered.add(new EItem(EItem.item.Processore, "Intel", 156.43));
         itemsOrdered.add(new EItem(EItem.item.Tastiera, "Razer", 98.99));
+        itemsOrdered.add(new EItem(EItem.item.Mouse, "Logitech", 61.50));
+        itemsOrdered.add(new EItem(EItem.item.Mouse, "Logitech", 60.50));
 
-        assertEquals(522.77, bill.getOrderPrice(itemsOrdered, user), 1e-4);
+
+        assertEquals(644.77, bill.getOrderPrice(itemsOrdered, user, LocalTime.of(14,00)), 1e-4);
     }
 
 
@@ -46,18 +52,18 @@ public class BillTest {
 
 
         try{
-            bill.getOrderPrice(itemsOrdered, user);
+            bill.getOrderPrice(itemsOrdered, user, LocalTime.of(14,00));
         }catch (BillException exc){
             assertEquals("La lista degli item ordinati contiene un valore null", exc.getMessage());
         }
     }
 
     @Test
-    public void testNullNellaLista() throws  BillException{
+    public void testListNull() throws  BillException{
         itemsOrdered = null;
 
         try{
-            bill.getOrderPrice(itemsOrdered, user);
+            bill.getOrderPrice(itemsOrdered, user, LocalTime.of(14,00));
         }catch(BillException exc){
             assertEquals("La lista degli item ordinati è uguale a null", exc.getMessage());
         }
@@ -67,7 +73,7 @@ public class BillTest {
     public void testUserNull(){
         itemsOrdered.add(new EItem(EItem.item.Mouse, "Logitech", 60.50));
         try{
-            bill.getOrderPrice(itemsOrdered, null);
+            bill.getOrderPrice(itemsOrdered, null, LocalTime.of(14,00));
         }catch (BillException exc){
             assertEquals("L'utente inserito è uguale a null", exc.getMessage());
         }
@@ -82,7 +88,7 @@ public class BillTest {
         itemsOrdered.add(new EItem(EItem.item.Processore, "Intel Box Core i5 5-12600KF", 262.40));
         itemsOrdered.add(new EItem(EItem.item.Processore, "Amd Ryzen 9 5950X", 516));
 
-        assertEquals(3756.35, bill.getOrderPrice(itemsOrdered, user), 1e-4);
+        assertEquals(3756.35, bill.getOrderPrice(itemsOrdered, user, LocalTime.of(14,00)), 1e-4);
     }
 
     @Test
@@ -99,7 +105,7 @@ public class BillTest {
         itemsOrdered.add(new EItem(EItem.item.Mouse, "Razer Viper Ultimate", 120.50));
         itemsOrdered.add(new EItem(EItem.item.Mouse, "Asus Rog Spatha", 132));
 
-        assertEquals(701.34, bill.getOrderPrice(itemsOrdered, user), 1e-4);
+        assertEquals(701.34, bill.getOrderPrice(itemsOrdered, user, LocalTime.of(14,00)), 1e-4);
     }
 
 
@@ -112,7 +118,7 @@ public class BillTest {
         itemsOrdered.add(new EItem(EItem.item.Tastiera, "Cooler Master CK530 V2", 86.30));
         itemsOrdered.add(new EItem(EItem.item.Tastiera, "Logitech G915 LIGHTSPEED TKL", 269.40));
 
-        assertEquals(569.62, bill.getOrderPrice(itemsOrdered, user), 1e-4);
+        assertEquals(569.62, bill.getOrderPrice(itemsOrdered, user, LocalTime.of(14,00)), 1e-4);
     }
 
     @Test
@@ -120,7 +126,7 @@ public class BillTest {
         itemsOrdered.add(new EItem(EItem.item.Tastiera, "Logitech G915 LIGHTSPEED TKL", 269.40));
         itemsOrdered.add(new EItem(EItem.item.Processore, "Intel Box Core i5 5-12600KF", 262.40));
         itemsOrdered.add(new EItem(EItem.item.Processore, "Amd 7452", 2552.30));
-        assertEquals(2775.69, bill.getOrderPrice(itemsOrdered, user), 1e-4);
+        assertEquals(2775.69, bill.getOrderPrice(itemsOrdered, user, LocalTime.of(14,00)), 1e-4);
     }
 
     @Test
@@ -129,7 +135,7 @@ public class BillTest {
             itemsOrdered.add(new EItem(EItem.item.Tastiera, "Tastiera", 50));
         }
         try{
-            bill.getOrderPrice(itemsOrdered, user);
+            bill.getOrderPrice(itemsOrdered, user, LocalTime.of(14,00));
         }catch(BillException exc){
             assertEquals("Ci sono piu di 30 oggetti ordinati", exc.getMessage());
         }
@@ -139,6 +145,13 @@ public class BillTest {
     public void testCommissione() throws BillException{
         itemsOrdered.add(new EItem(EItem.item.Mouse, "Mouse", 4.99));
 
-        assertEquals(6.99, bill.getOrderPrice(itemsOrdered, user), 1e-4);
+        assertEquals(6.99, bill.getOrderPrice(itemsOrdered, user, LocalTime.of(14,00)), 1e-4);
+    }
+
+    @Test
+    public void testFree() throws BillException{
+        itemsOrdered.add(new EItem(EItem.item.Mouse, "Trust", 9.81));
+        bill.giveaway.r.setSeed(10);
+        assertEquals(11.81, bill.getOrderPrice(itemsOrdered, user, LocalTime.of(18,30)), 1e-4);
     }
 }
